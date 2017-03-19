@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace LinkedList
 {
-    class Program
+    public class LinkedListNode<T>
     {
-        static void Main(string[] args)
-        {
-
-        }
+        public LinkedListNode<T> Next { get; set; }
+        public T Value { get; set; }
     }
 }
