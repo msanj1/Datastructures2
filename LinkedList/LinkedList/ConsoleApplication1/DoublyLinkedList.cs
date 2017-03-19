@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LinkedList
+namespace DoublyLinkedList
 {
     public class LinkedList<T>
     {
@@ -16,8 +16,12 @@ namespace LinkedList
             LinkedListNode<T> temp = Head;
             Head = Node;
             Head.Next = temp;
+            if (Count != 0)
+            {
+                temp.Previous = Head;
+            }
             Count++;
-            if(Count == 1)
+            if (Count == 1)
             {
                 Tail = Node;
             }
@@ -27,9 +31,11 @@ namespace LinkedList
             if (Count == 0)
             {
                 Head = Node;
-            }else
+            }
+            else
             {
                 Tail.Next = Node;
+                Node.Previous = Tail;
             }
             Tail = Node;
             Count++;
@@ -44,13 +50,8 @@ namespace LinkedList
                 }
                 else
                 {
-                    LinkedListNode<T> Current = Head;
-                    while (Current.Next != Tail)
-                    {
-                        Current = Current.Next;
-                    }
-                    Current.Next = null;
-                    Tail = Current;
+                    Tail.Previous.Next = null;
+                    Tail = Tail.Previous;
                 }
                 Count--;
             }
@@ -65,6 +66,9 @@ namespace LinkedList
                 if (Count == 0)
                 {
                     Tail = null;
+                }else
+                {
+                    Head.Previous = null;
                 }
             }
         }
@@ -99,9 +103,13 @@ namespace LinkedList
                             if (Current.Next == null)
                             {
                                 Previous.Next = Tail;
+                            }else
+                            {
+                                Current.Next.Previous = Previous;
                             }
                             Count--;
-                        }else
+                        }
+                        else
                         {
                             RemoveFirst();
                         }
