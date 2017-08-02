@@ -12,6 +12,13 @@ namespace ThreeSum
     {
         static void Main(string[] args)
         {
+
+            for (int i = 250; true; i+=i)
+            {
+                var time = DoublingTest.TimeTrial(i);
+                Console.WriteLine($"{i}\t{time}");
+            }
+
             List<string> randomNumbers = new List<string>();
 
             if (!File.Exists("./1000.txt"))

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,16 +9,17 @@ namespace ThreeSum
 {
     public class AlgStopWatch
     {
-        private readonly long _startTime;
+        private readonly Stopwatch _stopWatch;
 
         public AlgStopWatch()
         {
-            _startTime = DateTime.Now.Millisecond;
+            _stopWatch = new Stopwatch();
+            _stopWatch.Start();
         }
 
         public double ElapsedTime()
         {
-            return (DateTime.Now.Millisecond - _startTime) / 1000.0;
+            return _stopWatch.ElapsedMilliseconds / 1000.0;
         }
     }
 }
