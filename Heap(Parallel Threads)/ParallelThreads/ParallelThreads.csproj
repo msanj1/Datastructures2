@@ -5,10 +5,4 @@
     <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="JobQueue.cs" />
-    <Compile Remove="MinHeap.cs" />
-    <Compile Remove="Worker.cs" />
-  </ItemGroup>
-
 </Project>
