@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,8 +8,8 @@ namespace SubstringEquality
     {
         static void Main(string[] args)
         {
-            long p = (long)(10e9 + 7);
-            long p2 = (long)(10e9 + 9); ;
+            long p = (long)(1e9 + 7);
+            long p2 = (long)(1e9 + 9); ;
             int x = 263;
             var input = Console.ReadLine();
             var numberOfQueries = int.Parse(Console.ReadLine());
@@ -19,7 +19,7 @@ namespace SubstringEquality
 
             for (int i = 0; i < numberOfQueries; i++)
             {
-                var query = Console.ReadLine().Split(" ").Select(s => int.Parse(s)).ToList();
+                var query = Console.ReadLine().Split(' ').Select(s => int.Parse(s)).ToList();
                 var a = query[0];
                 var b = query[1];
                 var l = query[2];
