@@ -3,96 +3,121 @@ using System.Collections.Generic;
 
 namespace LongestCommonSubstring
 {
+    internal class Answer
+    {
+        public int Length { get; set; }
+        public int I { get; set; }
+        public int J { get; set; }
+    }
     internal class Program
     {
         const int x = 263;
-        const long p = (long)(1e9 + 7);
         static void Main(string[] args)
         {
-            var input = Console.ReadLine().Split(' ');
-
-            var s = input[0];
-            var t = input[1];
-
-            var answer = new Answer();
-
-            int l = 1;
-            int r = Math.Min(s.Length, t.Length);
-            string input1 = s;
-            string input2 = t;
-
-            var sHashes = PreComputeHashes(input1);
-            var sPowers = PreComputePowers(input1);
-            var tHashes = PreComputeHashes(input2);
-            var tPowers = PreComputePowers(input2);
-            while (l < r)
+            const long p = (long)(1e9 + 7);
+            const long p2 = (long)(1e9 + 9);
+            List<Answer> answers = new List<Answer>();
+            while(true)
             {
-                int mid = (l + r)/ 2;
-                Dictionary<long, int> hashes = new Dictionary<long, int>();
-                for (int i = 0; i <= input1.Length - mid; i++)
-                {
-                    var m = input1.Substring(i, mid);
-                    var hash = CalculatePrefixHash(sHashes, sPowers, i, mid);
-                    if(!hashes.ContainsKey(hash))
-                        hashes.Add(hash, i);
-                }
-                bool found = false;
-                for (int j = 0; j <= input2.Length - mid; j++)
-                {
-                    var m = input2.Substring(j, mid);
+                var currentInput =  Console.ReadLine();
+                if (string.IsNullOrEmpty(currentInput))
+                    break;
+                var input = currentInput.Split(' ');
+                var s = input[0];
+                var t = input[1];
 
-                    var hash = CalculatePrefixHash(tHashes, tPowers, j, mid);
-                    if (hashes.ContainsKey(hash))
+                int l = 1;
+                int r = Math.Min(s.Length, t.Length);
+                string input1 = s;
+                string input2 = t;
+
+                var answer = new Answer();
+                while (l <= r)
+                {
+                    int mid = (int)Math.Floor((l + r) / 2.0);
+                    Dictionary<long, Hash> hashes = new Dictionary<long, Hash>();
+
+                    var input1WindowHashes = PreComputeHash(input1, mid, p);
+                    var input1WindowHashes2 = PreComputeHash(input1, mid, p2);
+                    for (int i = 0; i < input1WindowHashes.Length; i++)
                     {
-                        found = true;
-                        var i = hashes[hash];
+                        if (!hashes.ContainsKey(input1WindowHashes[i]))
+                            hashes.Add(input1WindowHashes[i], new Hash { Hash1 = input1WindowHashes[i], Hash2 = input1WindowHashes2[i], Index = i });
+                    }
+                    bool found = false;
+                    var input2WindowHashes = PreComputeHash(input2, mid, p);
+                    var input2WindowHashes2 = PreComputeHash(input2, mid, p2);
+
+                    for (int j = 0; j < input2WindowHashes.Length; j++)
+                    {
+                        long input2Hash = input2WindowHashes[j];
+                        if (hashes.ContainsKey(input2Hash))
+                        {
+                            var hashesFromInput1 = hashes[input2Hash];
+                            if (hashesFromInput1.Hash1 == input2WindowHashes[j] && hashesFromInput1.Hash2 == input2WindowHashes2[j]) //to reduce collision
+                            {
+                                found = true;
+                                l = mid + 1;
+                                answer.Length = mid;
+                                answer.I = hashesFromInput1.Index;
+                                answer.J = j;
+                            }
+                        }
+                    }
+                    if (found)
+                    {
                         l = mid + 1;
-                        answer.Length = mid;
-                        answer.I = i;
-                        answer.J = j;
-                        break;
+                    }
+                    else
+                    {
+                        r = mid - 1;
                     }
                 }
-                if (!found)
-                {
-                    r = mid - 1;
-                }
-                
+                answers.Add(answer);
             }
 
-            Console.WriteLine($"{answer.I} {answer.J} {answer.Length}");
+            foreach (var answer in answers)
+            {
+                Console.WriteLine($"{answer.I} {answer.J} {answer.Length}");
+            }
         }
 
-        static long[] PreComputeHashes(string input)
+        static long PolyHash(string input, int x, long p)
         {
-            long[] hashes = new long[input.Length + 1];
-            for (int i = 1; i <= input.Length; i++)
+            long hash = 0;
+            for (int i = input.Length - 1; i >= 0; i--)
             {
-                hashes[i] = ((x * hashes[i - 1]) + input[i - 1]) % p;
+                hash = (hash * x + input[i]) % p;
+            }
+
+            return hash;
+        }
+
+        static long[] PreComputeHash(string input, int patternLength, long p)
+        {
+            var hashes = new long[input.Length - patternLength + 1]; 
+            var lastPattern = input.Substring(input.Length - patternLength, patternLength);
+            hashes[input.Length - patternLength] = PolyHash(lastPattern, x, p);
+            long y = 1;
+            for (int i = 1; i <= patternLength; i++)
+            {
+                y = (y * x) % p;
+            }
+
+            for (int i = input.Length - patternLength - 1; i >= 0; i--)
+            {
+                var hash = (x * hashes[i + 1] + input[i] - (y * input[i + patternLength])); //rolling hash
+                hashes[i] = ((hash % p) + p) % p; 
             }
 
             return hashes;
         }
+    }
 
-          static long[] PreComputePowers(string input)
-        {
-            long[] powers = new long[input.Length + 1];
-            powers[0] = 1;
-
-            for (int i = 1; i <= input.Length; i++)
-            {
-                powers[i] = x * powers[i - 1] % p;
-            }
-
-            return powers;
-        }
-
-        static long CalculatePrefixHash(long[] hashes, long[] powers, int startingIndex, int length)
-        {
-            var xPowerP = (powers[length]);
-            long hash = (hashes[startingIndex + length] - xPowerP * hashes[startingIndex]) % p;
-
-            return (hash + p) % p;
-        }
+    public class Hash
+    {
+        public long Hash1 { get; set; }
+        public long Hash2 { get; set; }
+        public int Index { get; set; }
     }
 }
