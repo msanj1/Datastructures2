@@ -11,9 +11,9 @@ namespace LongestCommonSubstring
     internal class Program
     {
         const int x = 263;
+        const long p = (long)(1e9 + 7);
         static void Main(string[] args)
         {
-            const long p = (long)(1e9 + 7);
             List<Answer> answers = new List<Answer>();
             while (true)
             {
@@ -24,16 +24,21 @@ namespace LongestCommonSubstring
                 string input = currentInput.Split(' ')[1];
                 string pattern = currentInput.Split(' ')[2];
                 var answer = new Answer();
-                for (int i=0; i <= input.Length - pattern.Length; i++)
+                var inputHashes = PreComputeHashes(input);
+                var inputPowers = PreComputePowers(input);
+
+                var patternHashes = PreComputeHashes(pattern);
+                var patternPowers = PreComputePowers(pattern);
+                for (int i = 0; i <= input.Length - pattern.Length; i++)
                 {
-                    var currentTerm = input.Substring(i, pattern.Length);
-                    if(IsEqual(currentTerm, pattern) <= numberOfMismatchesAllowed)
+                    var numberOfMismatches = IsEqual(i, 0, pattern.Length - 1, 0, inputHashes, inputPowers, patternHashes, patternPowers);
+                    if (numberOfMismatches <= numberOfMismatchesAllowed)
                     {
-                        answer.Indexes.Add(i);
                         answer.MistmatchCount++;
+                        answer.Indexes.Add(i);
                     }
                 }
-                answers.Add(answer);
+                    answers.Add(answer);
             }
 
             foreach (var answer in answers)
@@ -42,21 +47,32 @@ namespace LongestCommonSubstring
             }
         }
 
-        static int IsEqual(string input1, string input2)
+        static int IsEqual(int i, int l, int r, int mismatchCount, long[] inputHashes, long[] inputPowers, long[] patternHashes, long[] patternPowers)
         {
-            int numberOfMismatches = 0;
-            for (int j = 0; j < input1.Length; j++)
+            if (l <= r)
             {
-                if (input1[j] != input2[j])
+                int mid = l + (r - l) / 2;
+
+                if (CalculatePrefixHash(inputHashes, inputPowers, mid + i, 1) != CalculatePrefixHash(patternHashes, patternPowers, mid, 1))
                 {
-                    numberOfMismatches++;
+                    mismatchCount++;
+                }
+
+                if (l <= mid -1 && CalculatePrefixHash(inputHashes, inputPowers, l + i, mid - l) != CalculatePrefixHash(patternHashes, patternPowers, l, mid - l))
+                {
+                    mismatchCount = IsEqual(i,l, mid - 1, mismatchCount, inputHashes, inputPowers, patternHashes, patternPowers);
+                }
+
+                if (mid + 1 <= r && CalculatePrefixHash(inputHashes, inputPowers, mid + i + 1, r - mid) != CalculatePrefixHash(patternHashes, patternPowers, mid + 1, r - mid))
+                {
+                    mismatchCount = IsEqual(i, mid + 1, r, mismatchCount, inputHashes, inputPowers, patternHashes, patternPowers);
                 }
             }
 
-            return numberOfMismatches;
+            return mismatchCount;
         }
 
-        static long[] PreComputeHashes(string input, long x, long p)
+        static long[] PreComputeHashes(string input)
         {
             long[] hashes = new long[input.Length + 1];
             for (int i = 1; i <= input.Length; i++)
@@ -67,7 +83,7 @@ namespace LongestCommonSubstring
             return hashes;
         }
 
-        static long CalculatePrefixHash(long[] hashes, long[] powers, int startingIndex, int length, int x, long p)
+        static long CalculatePrefixHash(long[] hashes, long[] powers, int startingIndex, int length)
         {
             var xPowerP = (powers[length]);
             long hash = (hashes[startingIndex + length] - xPowerP * hashes[startingIndex]) % p;
@@ -75,7 +91,7 @@ namespace LongestCommonSubstring
             return (hash + p) % p;
         }
 
-        static long[] PreComputePowers(string input, long x, long p)
+        static long[] PreComputePowers(string input)
         {
             long[] powers = new long[input.Length + 1];
             powers[0] = 1;
