@@ -6,8 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="BinaryTree.cs" />
-    <Compile Remove="Node.cs" />
+    <Compile Remove="SplayTree.cs" />
+    <Compile Remove="Vertex.cs" />
+    <Compile Remove="VertexPair.cs" />
   </ItemGroup>
 
 </Project>
