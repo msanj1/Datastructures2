@@ -278,12 +278,7 @@ namespace RangeSum
             long ans = 0;
             if (leftMiddle.right != null && middleRight.left != null)
             {
-                var currentVertex = leftMiddle.right;
-                while (currentVertex != null)
-                {
-                    ans = Math.Max(currentVertex.sum, ans);
-                    currentVertex = currentVertex.parent;
-                }
+                ans = middleRight.left.sum;
             }
 
             root = merge(middleRight.left, ref middleRight.right);
