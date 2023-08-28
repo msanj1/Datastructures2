@@ -9,69 +9,55 @@ namespace BracketsInCode
         {
             var input = Console.ReadLine();
             var stack = new Stack<char>();
-            var isSuccessful = true;
-            int index = -1;
-            for(int i=0; i < input.Length; i++)
+            bool valid = true;
+            int currentCharacterIndex = -1;
+            var characters = new Dictionary<char, char>();
+            characters[')'] = '(';
+            characters['}'] = '{';
+            characters[']'] = '[';
+            var allowedCharacterSet = new HashSet<char>()
             {
-                var character = input[i];
+                '(', ')', '{', '}', '[', ']'
+            };
 
-                if(character == ']' || character == '}' || character == ')')
+            for (int i = 0; i < input.Length; i++)
+            {
+                var currentCharacter = input[i];
+
+                if (characters.ContainsKey(currentCharacter))
                 {
+                    char previousCharacter;
                     if (stack.Count > 0)
                     {
-                        var lastCharacter = stack.Pop();
-                        if (character == ']' && lastCharacter != '[')
+                        previousCharacter = stack.Pop();
+                        if (previousCharacter != characters[currentCharacter])
                         {
-                            index = i + 1;
-                            isSuccessful = false;
-                            break;
-                        }else
-                        if (character == '}' && lastCharacter != '{')
-                        {
-                            index = i + 1;
-                            isSuccessful = false;
-                            break;
-                        }else
-                        if (character == ')' && lastCharacter != '(')
-                        {
-                            index = i + 1;
-                            isSuccessful = false;
+                            valid = false;
+                            currentCharacterIndex = i;
                             break;
                         }
                     }
                     else
                     {
-                        index = i + 1;
-                        isSuccessful = false;
+                        valid = false;
+                        currentCharacterIndex = i;
                         break;
                     }
                 }
-                if(character == '[' || character == '{' || character == '(')
+                else
                 {
-                    if (stack.Count > 0)
+                    if (allowedCharacterSet.Contains(currentCharacter))
                     {
-                        var previousCharacter = stack.Peek();
-                        if (!(previousCharacter == '[' || previousCharacter == '{' || previousCharacter == '('))
-                        {
-                            index = i + 1;
-                        }
+                        if (stack.Count == 0)
+                            currentCharacterIndex = i;
+
+                        stack.Push(currentCharacter);
                     }
-                    else
-                    {
-                        index = i + 1;
-                    }
-                    stack.Push(character);
                 }
             }
 
-            if(isSuccessful && stack.Count == 0)
-            {
-                Console.WriteLine("Success");
-            }
-            else
-            {
-                Console.WriteLine(index);
-            }
+            currentCharacterIndex++;
+            Console.WriteLine(stack.Count == 0 && valid ? "Success" : currentCharacterIndex.ToString());
         }
     }
 }
